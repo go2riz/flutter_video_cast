@@ -40,6 +40,7 @@ class ChromeCastController {
     required ChromeCastMediaType type,
     required String url,
     required String title,
+    List<ChromeCastSubtitle>? subtitles,
     String? description,
     String? image,
     double position = 0,
@@ -58,6 +59,7 @@ class ChromeCastController {
       type: type,
       showEpisode: showEpisode,
       showSeason: showSeason,
+      subtitles: subtitles,
     );
   }
 
