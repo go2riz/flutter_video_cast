@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_event.dart';
+import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_media_type.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_platform.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_subtitle.dart';
 import 'package:stream_transform/stream_transform.dart';

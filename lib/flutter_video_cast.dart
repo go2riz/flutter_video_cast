@@ -3,6 +3,7 @@ library flutter_video_cast;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_media_type.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_platform.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_subtitle.dart';
 import 'package:flutter_video_cast/src/air_play/air_play_platform.dart';
