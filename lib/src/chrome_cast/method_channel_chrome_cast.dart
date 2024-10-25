@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_event.dart';
 import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_platform.dart';
+import 'package:flutter_video_cast/src/chrome_cast/chrome_cast_subtitle.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 /// An implementation of [ChromeCastPlatform] that uses [MethodChannel] to communicate with the native code.
@@ -71,8 +72,31 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   }
 
   @override
-  Future<void> loadMedia(String url, {required int id}) {
-    final Map<String, dynamic> args = {'url': url};
+  Future<void> loadMedia({
+    required int id,
+    required String url,
+    required double position,
+    required bool autoplay,
+    required String title,
+    required String description,
+    required String image,
+    required ChromeCastMediaType type,
+    List<ChromeCastSubtitle>? subtitles,
+    int? showSeason,
+    int? showEpisode,
+  }) {
+    final Map<String, dynamic> args = {
+      'url': url,
+      'position': position,
+      'autoplay': autoplay,
+      'title': title,
+      'desc': description,
+      'image': image,
+      'season': showSeason,
+      'episode': showEpisode,
+      'type': type == ChromeCastMediaType.movie ? 0 : 1,
+      'subtitles': subtitles?.map((e) => e.toMap()).toList(),
+    };
     return channel(id)!.invokeMethod<void>('chromeCast#loadMedia', args);
   }
 
