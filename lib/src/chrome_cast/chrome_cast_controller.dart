@@ -25,9 +25,40 @@ class ChromeCastController {
     return _chromeCastPlatform.removeSessionListener(id: id);
   }
 
-  /// Load a new media by providing an [url].
-  Future<void> loadMedia(String url) {
-    return _chromeCastPlatform.loadMedia(url, id: id);
+  /// Load a new media <br>
+  /// [url] - Url of the media <br>
+  /// [type] - Type of media <br>
+  /// [title] - Title of the media <br>
+  /// [description] - Description of the media<br>
+  /// [image] - Image url of the media<br>
+  /// [position] - Position (in ms) from which to start the media<br>
+  /// [autoplay] - Flag to disable/enable autoplay<br>
+  /// [showSeason] - Season No. for tv show<br>
+  /// [showEpisode] - Episode No. for tv show<br>
+  /// [subtitles] - Subtitle tracks
+  Future<void> loadMedia({
+    required ChromeCastMediaType type,
+    required String url,
+    required String title,
+    String? description,
+    String? image,
+    double position = 0,
+    bool autoplay = true,
+    int? showSeason,
+    int? showEpisode,
+  }) {
+    return _chromeCastPlatform.loadMedia(
+      id: id,
+      url: url,
+      position: position,
+      autoplay: autoplay,
+      title: title,
+      description: description ?? "",
+      image: image ?? "",
+      type: type,
+      showEpisode: showEpisode,
+      showSeason: showSeason,
+    );
   }
 
   /// Plays the video playback.

@@ -51,9 +51,17 @@ abstract class ChromeCastPlatform {
   }
 
   /// Load a new media by providing an [url].
-  Future<void> loadMedia(
-    String url, {
+  Future<void> loadMedia({
     required int id,
+    required String url,
+    required double position,
+    required bool autoplay,
+    required String title,
+    required String description,
+    required String image,
+    required ChromeCastMediaType type,
+    int? showSeason,
+    int? showEpisode,
   }) {
     throw UnimplementedError('loadMedia() has not been implemented.');
   }
