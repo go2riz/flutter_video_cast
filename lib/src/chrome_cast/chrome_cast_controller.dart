@@ -1,5 +1,3 @@
-import 'dart:async';
-
 part of flutter_video_cast;
 
 final ChromeCastPlatform _chromeCastPlatform = ChromeCastPlatform.instance;
