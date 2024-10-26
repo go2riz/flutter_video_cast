@@ -9,6 +9,9 @@ typedef void OnButtonCreated(ChromeCastController controller);
 /// Callback method for when a request has failed.
 typedef void OnRequestFailed(String? error);
 
+///Callback when a cast session is starting to end.
+typedef void OnSessionEnding(int? position);
+
 /// Widget that displays the ChromeCast button.
 class ChromeCastButton extends StatelessWidget {
   /// Creates a widget displaying a ChromeCast button.
