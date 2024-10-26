@@ -4,13 +4,10 @@ part of flutter_video_cast;
 ///
 /// Pass to [ChromeCastButton.onButtonCreated] to receive a [ChromeCastController]
 /// when the button is created.
-typedef OnButtonCreated = void Function(ChromeCastController controller);
+typedef void OnButtonCreated(ChromeCastController controller);
 
 /// Callback method for when a request has failed.
-typedef OnRequestFailed = void Function(String? error);
-
-///Callback when a cast session is starting to end.
-typedef OnSessionEnding = void Function(int? position);
+typedef void OnRequestFailed(String? error);
 
 /// Widget that displays the ChromeCast button.
 class ChromeCastButton extends StatelessWidget {
