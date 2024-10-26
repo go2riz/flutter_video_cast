@@ -4,10 +4,13 @@ part of flutter_video_cast;
 ///
 /// Pass to [ChromeCastButton.onButtonCreated] to receive a [ChromeCastController]
 /// when the button is created.
-typedef void OnButtonCreated(ChromeCastController controller);
+typedef OnButtonCreated = void Function(ChromeCastController controller);
 
 /// Callback method for when a request has failed.
-typedef void OnRequestFailed(String? error);
+typedef OnRequestFailed = void Function(String? error);
+
+///Callback when a cast session is starting to end.
+typedef OnSessionEnding = void Function(int? position);
 
 /// Widget that displays the ChromeCast button.
 class ChromeCastButton extends StatelessWidget {
@@ -21,6 +24,7 @@ class ChromeCastButton extends StatelessWidget {
     this.onSessionEnded,
     this.onRequestCompleted,
     this.onRequestFailed,
+    this.onSessionEnding,
   })  : assert(
             defaultTargetPlatform == TargetPlatform.iOS ||
                 defaultTargetPlatform == TargetPlatform.android,
@@ -50,6 +54,9 @@ class ChromeCastButton extends StatelessWidget {
 
   /// Called when a cast request has failed.
   final OnRequestFailed? onRequestFailed;
+
+  ///Called when a cast session is starting to end.
+  final OnSessionEnding? onSessionEnding;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +97,11 @@ class ChromeCastButton extends StatelessWidget {
       _chromeCastPlatform
           .onRequestFailed(id: id)
           .listen((event) => onRequestFailed!(event.error));
+    }
+    if (onSessionEnding != null) {
+      _chromeCastPlatform
+          .onSessionEnding(id: id)
+          .listen((event) => onSessionEnding!(event.lastPosition));
     }
   }
 }

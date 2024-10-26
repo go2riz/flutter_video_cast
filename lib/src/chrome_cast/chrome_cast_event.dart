@@ -24,6 +24,15 @@ class SessionEndedEvent extends ChromeCastEvent {
   SessionEndedEvent(int id) : super(id);
 }
 
+/// An event fired when a session of a [id] started to end.
+class SessionEndingEvent extends ChromeCastEvent {
+  /// The last position of playback
+  final int? lastPosition;
+
+  /// Build a SessionEnding Event triggered from the button represented by `id`.
+  SessionEndingEvent(int id, this.lastPosition) : super(id);
+}
+
 /// An event fired when a request of a [id] completed.
 class RequestDidCompleteEvent extends ChromeCastEvent {
   /// Build a RequestDidComplete Event triggered from the button represented by `id`.

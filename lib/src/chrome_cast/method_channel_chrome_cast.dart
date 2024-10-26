@@ -35,7 +35,7 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   Future<void> init(int id) {
     MethodChannel? channel;
     if (!_channels.containsKey(id)) {
-      channel = MethodChannel('flutter_video_cast/chromeCast_$id');
+      channel = MethodChannel('video_cast/chromeCast_$id');
       channel.setMethodCallHandler((call) => _handleMethodCall(call, id));
       _channels[id] = channel;
     }
@@ -55,6 +55,11 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   @override
   Stream<SessionStartedEvent> onSessionStarted({int? id}) {
     return _events(id).whereType<SessionStartedEvent>();
+  }
+
+  @override
+  Stream<SessionEndingEvent> onSessionEnding({int? id}) {
+    return _events(id).whereType<SessionEndingEvent>();
   }
 
   @override
@@ -127,6 +132,16 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   }
 
   @override
+  Future<void> updateTracks({required int id, required double subId}) {
+    return channel(id)!.invokeMethod("chromeCast#updateSubtitles", subId);
+  }
+
+  @override
+  Future<void> disableTracks({required int id}) {
+    return channel(id)!.invokeMethod("chromeCast#removeSubtitles");
+  }
+
+  @override
   Future<double> getVolume({required int id}) async {
     return (await channel(id)!.invokeMethod<double>('chromeCast#getVolume')) ??
         0;
@@ -183,6 +198,9 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
         _eventStreamController
             .add(RequestDidFailEvent(id, call.arguments['error']));
         break;
+      case 'chromeCast#onSessionEnding':
+        _eventStreamController.add(SessionEndingEvent(id, call.arguments));
+        break;
       default:
         throw MissingPluginException();
     }
@@ -193,14 +211,6 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
       PlatformViewCreatedCallback onPlatformViewCreated) {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidView(
-        viewType: 'ChromeCastButton',
-        onPlatformViewCreated: onPlatformViewCreated,
-        creationParams: arguments,
-        creationParamsCodec: const StandardMessageCodec(),
-      );
-    }
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return UiKitView(
         viewType: 'ChromeCastButton',
         onPlatformViewCreated: onPlatformViewCreated,
         creationParams: arguments,

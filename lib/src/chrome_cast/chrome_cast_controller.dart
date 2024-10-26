@@ -7,6 +7,9 @@ class ChromeCastController {
   /// The id for this controller
   final int id;
 
+  Timer? _timer;
+  StreamController<Duration>? _streamController;
+
   ChromeCastController._({required this.id});
 
   /// Initialize control of a [ChromeCastButton] with [id].
@@ -85,6 +88,17 @@ class ChromeCastController {
     return _chromeCastPlatform.setVolume(volume, id: id);
   }
 
+  /// Set active subtitle track
+  /// [subId] - Subtitle unique id passed in loadMedia()
+  Future<void> setTrack({required double subId}) {
+    return _chromeCastPlatform.updateTracks(id: id, subId: subId);
+  }
+
+  /// Disables the current active subtitle track
+  Future<void> disableTrack() {
+    return _chromeCastPlatform.disableTracks(id: id);
+  }
+
   /// Get current volume
   Future<double> getVolume() {
     return _chromeCastPlatform.getVolume(id: id);
@@ -118,5 +132,29 @@ class ChromeCastController {
   /// Returns video duration.
   Future<Duration> duration() {
     return _chromeCastPlatform.duration(id: id);
+  }
+
+  /// Returns a stream for progress updates.
+  /// Call cancelTimer() to dispose
+  Stream<Duration> onProgressEvent() {
+    _streamController = StreamController<Duration>();
+
+    _timer = Timer.periodic(
+      const Duration(
+        milliseconds: 500,
+      ),
+      (timer) async {
+        Duration duration = await position();
+        _streamController?.add(duration);
+      },
+    );
+
+    return _streamController!.stream;
+  }
+
+  /// Cancels timer of progress updates.
+  void cancelTimer() {
+    _timer?.cancel();
+    _streamController?.close();
   }
 }

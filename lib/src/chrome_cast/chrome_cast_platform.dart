@@ -7,7 +7,7 @@ import 'package:flutter_video_cast/src/chrome_cast/method_channel_chrome_cast.da
 
 /// The interface that platform-specific implementations of `flutter_video_cast` must extend.
 abstract class ChromeCastPlatform {
-  static ChromeCastPlatform _instance = MethodChannelChromeCast();
+  static final ChromeCastPlatform _instance = MethodChannelChromeCast();
 
   /// The default instance of [ChromeCastPlatform] to use.
   ///
@@ -42,6 +42,11 @@ abstract class ChromeCastPlatform {
     throw UnimplementedError('onSessionEnded() has not been implemented.');
   }
 
+  /// A session has started to end.
+  Stream<SessionEndingEvent> onSessionEnding({required int id}) {
+    throw UnimplementedError('onSessionEnding() has not been implemented.');
+  }
+
   /// A request has completed.
   Stream<RequestDidCompleteEvent> onRequestCompleted({required int id}) {
     throw UnimplementedError('onRequestCompleted() has not been implemented.');
@@ -49,7 +54,7 @@ abstract class ChromeCastPlatform {
 
   /// A request has failed.
   Stream<RequestDidFailEvent> onRequestFailed({required int id}) {
-    throw UnimplementedError('onSessionEnded() has not been implemented.');
+    throw UnimplementedError('onRequestFailed() has not been implemented.');
   }
 
   /// Load a new media by providing an [url].
@@ -91,6 +96,16 @@ abstract class ChromeCastPlatform {
     throw UnimplementedError('setVolume() has not been implemented.');
   }
 
+  /// Update Subtitle Track
+  Future<void> updateTracks({required int id, required double subId}) {
+    throw UnimplementedError('updateTracks() has not been implemented.');
+  }
+
+  /// Disable current active subtitle track
+  Future<void> disableTracks({required int id}) {
+    throw UnimplementedError('disableTracks() has not been implemented.');
+  }
+
   /// Get volume
   Future<double> getVolume({required int id}) {
     throw UnimplementedError('getVolume() has not been implemented.');
@@ -110,7 +125,6 @@ abstract class ChromeCastPlatform {
   Future<void> endSession({required int id}) {
     throw UnimplementedError('seek() has not been implemented.');
   }
-
 
   /// Returns `true` when a cast session is playing, `false` otherwise.
   Future<bool?> isPlaying({required int id}) {
