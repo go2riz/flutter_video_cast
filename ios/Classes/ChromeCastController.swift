@@ -160,7 +160,7 @@ class ChromeCastController: NSObject, FlutterPlatformView {
                                                    textSubtype: .subtitles,
                                                    name: name,
                                                    languageCode: language,
-                                                   customData: nil)
+                                                   textTrackStyle: GCKTextTrackStyle()) // Add text track style as needed
                     mediaTracks.append(mediaTrack)
                 }
             }
