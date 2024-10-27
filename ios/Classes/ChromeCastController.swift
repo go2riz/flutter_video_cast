@@ -116,15 +116,74 @@ class ChromeCastController: NSObject, FlutterPlatformView {
     }
 
     private func loadMedia(args: Any?) {
-        guard
-            let args = args as? [String: Any],
-            let url = args["url"] as? String,
-            let mediaUrl = URL(string: url) else {
-                print("Invalid URL")
-                return
+        guard let args = args as? [String: Any],
+              let urlString = args["url"] as? String,
+              let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
         }
-        let mediaInformation = GCKMediaInformationBuilder(contentURL: mediaUrl).build()
-        if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation) {
+
+        // Set media type metadata
+        let mediaMetadata = (args["type"] as? Int == 0) ? GCKMediaMetadata(metadataType: .movie) : GCKMediaMetadata(metadataType: .tvShow)
+
+        // Set title, description, season, and episode
+        if let title = args["title"] as? String {
+            mediaMetadata.setString(title, forKey: kGCKMetadataKeyTitle)
+        }
+        if let description = args["desc"] as? String {
+            mediaMetadata.setString(description, forKey: kGCKMetadataKeySubtitle)
+        }
+        if let season = args["season"] as? Int {
+            mediaMetadata.setInteger(season, forKey: kGCKMetadataKeySeasonNumber)
+        }
+        if let episode = args["episode"] as? Int {
+            mediaMetadata.setInteger(episode, forKey: kGCKMetadataKeyEpisodeNumber)
+        }
+
+        // Set image
+        if let imageUrlString = args["image"] as? String, let imageUrl = URL(string: imageUrlString) {
+            mediaMetadata.addImage(GCKImage(url: imageUrl, width: 480, height: 720))
+        }
+
+        // Set up subtitle tracks
+        var mediaTracks: [GCKMediaTrack] = []
+        if let subtitles = args["subtitles"] as? [[String: Any]] {
+            for subtitle in subtitles {
+                if let trackID = subtitle["id"] as? Double,
+                   let source = subtitle["source"] as? String,
+                   let language = subtitle["language"] as? String,
+                   let name = subtitle["name"] as? String {
+                    let mediaTrack = GCKMediaTrack(identifier: Int(trackID),
+                                                   contentIdentifier: source,
+                                                   contentType: "text/vtt",
+                                                   type: .text,
+                                                   textSubtype: .subtitles,
+                                                   name: name,
+                                                   languageCode: language,
+                                                   customData: nil)
+                    mediaTracks.append(mediaTrack)
+                }
+            }
+        }
+
+        // Build media information
+        let mediaInformation = GCKMediaInformationBuilder(contentURL: url)
+            .setStreamType(.buffered)
+            .setMetadata(mediaMetadata)
+            .setMediaTracks(mediaTracks)
+            .build()
+
+        // Set load options (autoplay and position)
+        let options = GCKMediaLoadOptions()
+        if let autoPlay = args["autoplay"] as? Bool {
+            options.autoplay = autoPlay
+        }
+        if let position = args["position"] as? Double {
+            options.playPosition = position
+        }
+
+        // Load media
+        if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation, with: options) {
             request.delegate = self
         }
     }
@@ -178,12 +237,24 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         sessionManager.remove(self)
     }
 
-    private func position() -> Int {        
+    private func position() -> Int {
         return Int(sessionManager.currentCastSession?.remoteMediaClient?.approximateStreamPosition() ?? 0) * 1000
     }
 
     private func endSession() {
         sessionManager.endSession()
+    }
+
+    private func updateSubtitle(args: Double?) {
+        let request: GCKRequest?
+
+        if let args = args {
+            request = sessionManager.currentCastSession?.remoteMediaClient?.setActiveMediaTracks([NSNumber(value: args)])
+        } else {
+            request = sessionManager.currentCastSession?.remoteMediaClient?.setActiveMediaTracks([])
+        }
+
+        request?.delegate = self
     }
 
 }

@@ -1,29 +1,38 @@
 package it.aesys.flutter_video_cast
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import android.view.ContextThemeWrapper
 import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.MediaMetadata
+import com.google.android.gms.cast.MediaTrack
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.Session
 import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.common.images.WebImage
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import java.util.*
 
 class ChromeCastController(
-        messenger: BinaryMessenger,
-        viewId: Int,
-        context: Context?
+    messenger: BinaryMessenger,
+    viewId: Int,
+    context: Context?
 ) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>, PendingResult.StatusListener {
     private val channel = MethodChannel(messenger, "flutter_video_cast/chromeCast_$viewId")
     private val chromeCastButton = MediaRouteButton(ContextThemeWrapper(context, R.style.Theme_AppCompat_NoActionBar))
     private val sessionManager = CastContext.getSharedInstance()?.sessionManager
+
+    private val movie = 0
 
     init {
         CastButtonFactory.setUpMediaRouteButton(context!!, chromeCastButton)
@@ -33,9 +42,54 @@ class ChromeCastController(
     private fun loadMedia(args: Any?) {
         if (args is Map<*, *>) {
             val url = args["url"] as? String
-            val media = MediaInfo.Builder(url!!).build()
-            val options = MediaLoadOptions.Builder().build()
-            val request = sessionManager?.currentCastSession?.remoteMediaClient?.load(media, options)
+            val position = args["position"] as? Double
+            val autoPlay = args["autoplay"] as? Boolean
+            val title = args["title"] as? String
+            val desc = args["desc"] as? String
+            val image = args["image"] as? String
+            val type = args["type"] as? Int
+            val season = args["season"] as? Int
+            val episode = args["episode"] as? Int
+            val subtitles = args["subtitles"] as? List<*>
+
+            val mediaMeta: MediaMetadata = if (type== movie){
+                MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
+            } else {
+                MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW)
+            }
+            title?.let { mediaMeta.putString(MediaMetadata.KEY_TITLE, it) }
+            desc?.let { mediaMeta.putString(MediaMetadata.KEY_SUBTITLE, it) }
+            season?.let { mediaMeta.putInt(MediaMetadata.KEY_SEASON_NUMBER, season)}
+            episode?.let { mediaMeta.putInt(MediaMetadata.KEY_EPISODE_NUMBER, episode)}
+
+            mediaMeta.addImage(WebImage(Uri.parse(image)))
+
+            val tracks = mutableListOf<MediaTrack>();
+            if (subtitles != null) {
+                for (element in subtitles){
+                    if (element is Map<*, *>){
+                        val subtitleTrack = MediaTrack.Builder((element["id"] as Double).toLong(), MediaTrack.TYPE_TEXT);
+                        subtitleTrack.setSubtype(MediaTrack.SUBTYPE_SUBTITLES)
+                        subtitleTrack.setName(element["name"] as String?)
+                        subtitleTrack.setContentId(element["source"] as String?)
+                        subtitleTrack.setLanguage(element["language"] as String?)
+                        tracks.add(subtitleTrack.build())
+                    }
+                }
+            }
+
+
+            val media = MediaInfo.Builder(url!!)
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setMetadata(mediaMeta)
+                .setMediaTracks(tracks)
+                .build()
+
+            val optionsBuilder = MediaLoadOptions.Builder()
+            autoPlay?.let { optionsBuilder.setAutoplay(it) }
+            position?.let { optionsBuilder.setPlayPosition(it.toLong()) }
+
+            val request = sessionManager?.currentCastSession?.remoteMediaClient?.load(media, optionsBuilder.build())
             request?.addStatusListener(this)
         }
     }
@@ -67,6 +121,16 @@ class ChromeCastController(
         if (args is Map<*, *>) {
             val volume = args["volume"] as? Double
             val request = sessionManager?.currentCastSession?.remoteMediaClient?.setStreamVolume(volume ?: 0.0)
+            request?.addStatusListener(this)
+        }
+    }
+
+    private fun updateSubtitle(args: Double?) {
+        if (args != null){
+            val request = sessionManager?.currentCastSession?.remoteMediaClient?.setActiveMediaTracks(longArrayOf(args.toLong()))
+            request?.addStatusListener(this)
+        } else {
+            val request = sessionManager?.currentCastSession?.remoteMediaClient?.setActiveMediaTracks(longArrayOf())
             request?.addStatusListener(this)
         }
     }
@@ -127,6 +191,15 @@ class ChromeCastController(
                 setVolume(call.arguments)
                 result.success(null)
             }
+            "chromeCast#updateSubtitles" -> {
+                updateSubtitle(call.arguments as Double?)
+                result.success(null)
+            }
+            "chromeCast#removeSubtitles" -> {
+                updateSubtitle(null)
+                result
+                    .success(null)
+            }
             "chromeCast#getVolume" -> result.success(getVolume())
             "chromeCast#stop" -> {
                 stop()
@@ -182,7 +255,7 @@ class ChromeCastController(
     }
 
     override fun onSessionEnding(p0: Session) {
-
+        channel.invokeMethod("chromeCast#onSessionEnding", sessionManager?.currentCastSession?.remoteMediaClient?.approximateStreamPosition)
     }
 
     override fun onSessionStartFailed(p0: Session, p1: Int) {
