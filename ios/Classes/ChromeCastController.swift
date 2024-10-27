@@ -122,6 +122,7 @@ class ChromeCastController: NSObject, FlutterPlatformView {
             print("Invalid URL")
             return
         }
+        print("====================================================ENTER===========================================")
 
         // Set media type metadata
         let mediaMetadata = (args["type"] as? Int == 0) ? GCKMediaMetadata(metadataType: .movie) : GCKMediaMetadata(metadataType: .tvShow)
@@ -146,12 +147,9 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         }
 
         // Build media information
-        print("url: \(url)")
         let builder = GCKMediaInformationBuilder(contentURL: url)
         builder.metadata = mediaMetadata
         let mediaInformation = builder.build()
-
-        print("media url: \(mediaInformation.contentURL)")
 
         // Set load options (autoplay and position)
         let options = GCKMediaLoadOptions()
