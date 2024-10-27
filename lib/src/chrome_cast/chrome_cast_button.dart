@@ -10,7 +10,7 @@ typedef void OnButtonCreated(ChromeCastController controller);
 typedef void OnRequestFailed(String? error);
 
 ///Callback when a cast session is starting to end.
-typedef void OnSessionEnding(int? position);
+// typedef void OnSessionEnding(int? position);
 
 /// Widget that displays the ChromeCast button.
 class ChromeCastButton extends StatelessWidget {
@@ -24,7 +24,7 @@ class ChromeCastButton extends StatelessWidget {
     this.onSessionEnded,
     this.onRequestCompleted,
     this.onRequestFailed,
-    this.onSessionEnding,
+//     this.onSessionEnding,
   })  : assert(
             defaultTargetPlatform == TargetPlatform.iOS ||
                 defaultTargetPlatform == TargetPlatform.android,
@@ -56,7 +56,7 @@ class ChromeCastButton extends StatelessWidget {
   final OnRequestFailed? onRequestFailed;
 
   ///Called when a cast session is starting to end.
-  final OnSessionEnding? onSessionEnding;
+//   final OnSessionEnding? onSessionEnding;
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +98,10 @@ class ChromeCastButton extends StatelessWidget {
           .onRequestFailed(id: id)
           .listen((event) => onRequestFailed!(event.error));
     }
-    if (onSessionEnding != null) {
-      _chromeCastPlatform
-          .onSessionEnding(id: id)
-          .listen((event) => onSessionEnding!(event.lastPosition));
-    }
+//     if (onSessionEnding != null) {
+//       _chromeCastPlatform
+//           .onSessionEnding(id: id)
+//           .listen((event) => onSessionEnding!(event.lastPosition));
+//     }
   }
 }

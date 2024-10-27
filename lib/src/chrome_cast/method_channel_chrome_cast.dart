@@ -217,6 +217,14 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
         creationParamsCodec: const StandardMessageCodec(),
       );
     }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      return UiKitView(
+        viewType: 'ChromeCastButton',
+        onPlatformViewCreated: onPlatformViewCreated,
+        creationParams: arguments,
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    }
     return Text('$defaultTargetPlatform is not supported by ChromeCast plugin');
   }
 }
