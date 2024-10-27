@@ -160,20 +160,18 @@ class ChromeCastController: NSObject, FlutterPlatformView {
                                                    textSubtype: .subtitles,
                                                    name: name,
                                                    languageCode: language,
-                                                   textTrackStyle: GCKTextTrackStyle()) // Add text track style as needed
+                                                   customData: nil) // Remove textTrackStyle if not needed
                     mediaTracks.append(mediaTrack)
                 }
             }
         }
 
         // Build media information
-        let mediaInformation = GCKMediaInformation(contentID: url.absoluteString,
-                                                    streamType: .buffered, // Correctly use enum
-                                                    contentType: "video/mp4", // Update as needed
-                                                    metadata: mediaMetadata,
-                                                    streamDuration: 0, // Set as needed
-                                                    mediaTracks: mediaTracks,
-                                                    customData: nil)
+        let mediaInformation = GCKMediaInformation.builder(contentURL: url)
+            .setStreamType(.buffered)
+            .setMetadata(mediaMetadata)
+            .setMediaTracks(mediaTracks)
+            .build()
 
         // Set load options (autoplay and position)
         let options = GCKMediaLoadOptions()
@@ -181,11 +179,11 @@ class ChromeCastController: NSObject, FlutterPlatformView {
             options.autoplay = autoPlay
         }
         if let position = args["position"] as? Double {
-            options.playPosition = position
+            options.playPosition = Int64(position) // Adjusted for Int64
         }
 
         // Load media
-        if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation, with: options) {
+        if let request = sessionManager.currentCastSession?.remoteMediaClient?.load(mediaInformation, with: options) {
             request.delegate = self
         }
     }
