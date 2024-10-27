@@ -39,58 +39,76 @@ class ChromeCastController(
         channel.setMethodCallHandler(this)
     }
 
-    private fun loadMedia(args: Any?) {
-        if (args is Map<*, *>) {
-            val url = args["url"] as? String
-            val position = args["position"] as? Double
-            val autoPlay = args["autoplay"] as? Boolean
-            val title = args["title"] as? String
-            val desc = args["desc"] as? String
-            val image = args["image"] as? String
-            val type = args["type"] as? Int
-            val season = args["season"] as? Int
-            val episode = args["episode"] as? Int
-            val subtitles = args["subtitles"] as? List<*>
+    private func loadMedia(args: Any?) {
+        guard let args = args as? [String: Any],
+              let urlString = args["url"] as? String,
+              let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
 
-            val mediaMeta: MediaMetadata = if (type== movie){
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-            } else {
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW)
-            }
-            title?.let { mediaMeta.putString(MediaMetadata.KEY_TITLE, it) }
-            desc?.let { mediaMeta.putString(MediaMetadata.KEY_SUBTITLE, it) }
-            season?.let { mediaMeta.putInt(MediaMetadata.KEY_SEASON_NUMBER, season)}
-            episode?.let { mediaMeta.putInt(MediaMetadata.KEY_EPISODE_NUMBER, episode)}
+        // Set media type metadata
+        let mediaMetadata = (args["type"] as? Int == 0) ? GCKMediaMetadata(metadataType: .movie) : GCKMediaMetadata(metadataType: .tvShow)
 
-            mediaMeta.addImage(WebImage(Uri.parse(image)))
+        // Set title, description, season, and episode
+        if let title = args["title"] as? String {
+            mediaMetadata.setString(title, forKey: kGCKMetadataKeyTitle)
+        }
+        if let description = args["desc"] as? String {
+            mediaMetadata.setString(description, forKey: kGCKMetadataKeySubtitle)
+        }
+        if let season = args["season"] as? Int {
+            mediaMetadata.setInteger(season, forKey: kGCKMetadataKeySeasonNumber)
+        }
+        if let episode = args["episode"] as? Int {
+            mediaMetadata.setInteger(episode, forKey: kGCKMetadataKeyEpisodeNumber)
+        }
 
-            val tracks = mutableListOf<MediaTrack>();
-            if (subtitles != null) {
-                for (element in subtitles){
-                    if (element is Map<*, *>){
-                        val subtitleTrack = MediaTrack.Builder((element["id"] as Double).toLong(), MediaTrack.TYPE_TEXT);
-                        subtitleTrack.setSubtype(MediaTrack.SUBTYPE_SUBTITLES)
-                        subtitleTrack.setName(element["name"] as String?)
-                        subtitleTrack.setContentId(element["source"] as String?)
-                        subtitleTrack.setLanguage(element["language"] as String?)
-                        tracks.add(subtitleTrack.build())
-                    }
+        // Set image
+        if let imageUrlString = args["image"] as? String, let imageUrl = URL(string: imageUrlString) {
+            mediaMetadata.addImage(GCKImage(url: imageUrl, width: 480, height: 720))
+        }
+
+        // Set up subtitle tracks
+        var mediaTracks: [GCKMediaTrack] = []
+        if let subtitles = args["subtitles"] as? [[String: Any]] {
+            for subtitle in subtitles {
+                if let trackID = subtitle["id"] as? Double,
+                   let source = subtitle["source"] as? String,
+                   let language = subtitle["language"] as? String,
+                   let name = subtitle["name"] as? String {
+                    let mediaTrack = GCKMediaTrack(identifier: Int(trackID),
+                                                   contentIdentifier: source,
+                                                   contentType: "text/vtt",
+                                                   type: .text,
+                                                   textSubtype: .subtitles,
+                                                   name: name,
+                                                   languageCode: language,
+                                                   customData: nil) // Remove textTrackStyle if not needed
+                    mediaTracks.append(mediaTrack)
                 }
             }
+        }
 
+        // Build media information
+        let mediaInformation = GCKMediaInformation.builder(contentURL: url)
+            .setStreamType(.buffered)
+            .setMetadata(mediaMetadata)
+            .setMediaTracks(mediaTracks)
+            .build()
 
-            val media = MediaInfo.Builder(url!!)
-                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-                .setMetadata(mediaMeta)
-                .setMediaTracks(tracks)
-                .build()
+        // Set load options (autoplay and position)
+        let options = GCKMediaLoadOptions()
+        if let autoPlay = args["autoplay"] as? Bool {
+            options.autoplay = autoPlay
+        }
+        if let position = args["position"] as? Double {
+            options.playPosition = Int64(position) // Adjusted for Int64
+        }
 
-            val optionsBuilder = MediaLoadOptions.Builder()
-            autoPlay?.let { optionsBuilder.setAutoplay(it) }
-            position?.let { optionsBuilder.setPlayPosition(it.toLong()) }
-
-            val request = sessionManager?.currentCastSession?.remoteMediaClient?.load(media, optionsBuilder.build())
-            request?.addStatusListener(this)
+        // Load media
+        if let request = sessionManager.currentCastSession?.remoteMediaClient?.load(mediaInformation, with: options) {
+            request.delegate = self
         }
     }
 
