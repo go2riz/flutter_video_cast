@@ -167,11 +167,13 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         }
 
         // Build media information
-        let mediaInformation = GCKMediaInformationBuilder(contentURL: url)
-            .setStreamType(.buffered)
-            .setMetadata(mediaMetadata)
-            .setMediaTracks(mediaTracks)
-            .build()
+        let mediaInformation = GCKMediaInformation(contentID: url.absoluteString,
+                                                    streamType: .buffered, // Correctly use enum
+                                                    contentType: "video/mp4", // Update as needed
+                                                    metadata: mediaMetadata,
+                                                    streamDuration: 0, // Set as needed
+                                                    mediaTracks: mediaTracks,
+                                                    customData: nil)
 
         // Set load options (autoplay and position)
         let options = GCKMediaLoadOptions()
@@ -246,12 +248,13 @@ class ChromeCastController: NSObject, FlutterPlatformView {
     }
 
     private func updateSubtitle(args: Double?) {
-        let request: GCKRequest?
+        let trackIDs: [NSNumber] = args != nil ? [NSNumber(value: args!.int64Value)] : []
 
-        if let args = args {
-            request = sessionManager.currentCastSession?.remoteMediaClient?.setActiveMediaTracks([NSNumber(value: args)])
-        } else {
-            request = sessionManager.currentCastSession?.remoteMediaClient?.setActiveMediaTracks([])
+        let request = sessionManager.currentCastSession?.remoteMediaClient?.setActiveMediaTracks(trackIDs) { error in
+            if let error = error {
+                // Handle error if needed
+                print("Error setting active media tracks: \(error.localizedDescription)")
+            }
         }
 
         request?.delegate = self
