@@ -146,9 +146,12 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         }
 
         // Build media information
+        print("url: \(url)")
         let builder = GCKMediaInformationBuilder(contentURL: url)
         builder.metadata = mediaMetadata
         let mediaInformation = builder.build()
+
+        print("media url: \(mediaInformation.contentURL)")
 
         // Set load options (autoplay and position)
         let options = GCKMediaLoadOptions()
