@@ -35,7 +35,7 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   Future<void> init(int id) {
     MethodChannel? channel;
     if (!_channels.containsKey(id)) {
-      channel = MethodChannel('video_cast/chromeCast_$id');
+      channel = MethodChannel('flutter_video_cast/chromeCast_$id');
       channel.setMethodCallHandler((call) => _handleMethodCall(call, id));
       _channels[id] = channel;
     }
