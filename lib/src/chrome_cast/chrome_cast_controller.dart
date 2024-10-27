@@ -8,7 +8,7 @@ class ChromeCastController {
   final int id;
 
 //   Timer? _timer;
-  StreamController<Duration>? _streamController;
+//   StreamController<Duration>? _streamController;
 
   ChromeCastController._({required this.id});
 
