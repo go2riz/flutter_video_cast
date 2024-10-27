@@ -159,33 +159,31 @@ class ChromeCastController: NSObject, FlutterPlatformView {
                                                    type: .text,
                                                    textSubtype: .subtitles,
                                                    name: name,
-                                                   languageCode: language,
-                                                   customData: nil) // Remove textTrackStyle if not needed
+                                                   languageCode: language)
                     mediaTracks.append(mediaTrack)
                 }
             }
         }
 
         // Build media information
-        let mediaInformation = GCKMediaInformation.builder(contentURL: url)
-            .setStreamType(.buffered)
-            .setMetadata(mediaMetadata)
-            .setMediaTracks(mediaTracks)
-            .build()
+        let mediaInformation = GCKMediaInformationBuilder(contentURL: url, metadata: mediaMetadata, mediaTrack: mediaTrack).build()
 
         // Set load options (autoplay and position)
         let options = GCKMediaLoadOptions()
         if let autoPlay = args["autoplay"] as? Bool {
             options.autoplay = autoPlay
         }
-        if let position = args["position"] as? Double {
-            options.playPosition = Int64(position) // Adjusted for Int64
-        }
+//         if let position = args["position"] as? Double {
+//             options.playPosition = Int64(position) // Adjusted for Int64
+//         }
 
         // Load media
-        if let request = sessionManager.currentCastSession?.remoteMediaClient?.load(mediaInformation, with: options) {
+        if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation, with: options) {
             request.delegate = self
         }
+//         if let request = sessionManager.currentCastSession?.remoteMediaClient?.load(mediaInformation, with: options) {
+//             request.delegate = self
+//         }
     }
 
     private func play() {
