@@ -7,7 +7,7 @@ class ChromeCastController {
   /// The id for this controller
   final int id;
 
-  Timer? _timer;
+//   Timer? _timer;
   StreamController<Duration>? _streamController;
 
   ChromeCastController._({required this.id});
@@ -136,25 +136,25 @@ class ChromeCastController {
 
   /// Returns a stream for progress updates.
   /// Call cancelTimer() to dispose
-  Stream<Duration> onProgressEvent() {
-    _streamController = StreamController<Duration>();
+//   Stream<Duration> onProgressEvent() {
+//     _streamController = StreamController<Duration>();
 
-    _timer = Timer.periodic(
-      const Duration(
-        milliseconds: 500,
-      ),
-      (timer) async {
-        Duration duration = await position();
-        _streamController?.add(duration);
-      },
-    );
+//     _timer = Timer.periodic(
+//       const Duration(
+//         milliseconds: 500,
+//       ),
+//       (timer) async {
+//         Duration duration = await position();
+//         _streamController?.add(duration);
+//       },
+//     );
 
-    return _streamController!.stream;
-  }
+//     return _streamController!.stream;
+//   }
 
   /// Cancels timer of progress updates.
-  void cancelTimer() {
-    _timer?.cancel();
-    _streamController?.close();
-  }
+//   void cancelTimer() {
+//     _timer?.cancel();
+//     _streamController?.close();
+//   }
 }

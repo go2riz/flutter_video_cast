@@ -1,6 +1,6 @@
 library flutter_video_cast;
 
-import 'dart:async';
+// import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
