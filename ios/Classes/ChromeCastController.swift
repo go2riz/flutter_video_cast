@@ -122,10 +122,18 @@ class ChromeCastController: NSObject, FlutterPlatformView {
             print("Invalid URL")
             return
         }
-        print("====================================================ENTER===========================================")
 
         // Set media type metadata
-        let mediaMetadata = (args["type"] as? Int == 0) ? GCKMediaMetadata(metadataType: .movie) : GCKMediaMetadata(metadataType: .tvShow)
+        let mediaMetadata: GCKMediaMetadata
+
+        switch args["type"] as? Int {
+        case 1:
+            mediaMetadata = GCKMediaMetadata(metadataType: .movie)
+        case 2:
+            mediaMetadata = GCKMediaMetadata(metadataType: .tvShow)
+        default:
+            mediaMetadata = GCKMediaMetadata(metadataType: .generic) // Fallback for HLS or other types
+        }
 
         // Set title, description, season, and episode
         if let title = args["title"] as? String {

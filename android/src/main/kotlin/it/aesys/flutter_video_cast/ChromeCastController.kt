@@ -32,8 +32,6 @@ class ChromeCastController(
     private val chromeCastButton = MediaRouteButton(ContextThemeWrapper(context, R.style.Theme_AppCompat_NoActionBar))
     private val sessionManager = CastContext.getSharedInstance()?.sessionManager
 
-    private val movie = 0
-
     init {
         CastButtonFactory.setUpMediaRouteButton(context!!, chromeCastButton)
         channel.setMethodCallHandler(this)
@@ -52,11 +50,14 @@ class ChromeCastController(
             val episode = args["episode"] as? Int
             val subtitles = args["subtitles"] as? List<*>
 
-            val mediaMeta: MediaMetadata = if (type== movie){
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
-            } else {
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW)
-            }
+            val mediaMeta = MediaMetadata(
+                when (type) {
+                    ChromeCastMediaType.MOVIE -> MediaMetadata.MEDIA_TYPE_MOVIE
+                    ChromeCastMediaType.TV_SHOW -> MediaMetadata.MEDIA_TYPE_TV_SHOW
+                    else -> MediaMetadata.MEDIA_TYPE_GENERIC // Fallback type for other cases like HLS
+                }
+            )
+
             title?.let { mediaMeta.putString(MediaMetadata.KEY_TITLE, it) }
             desc?.let { mediaMeta.putString(MediaMetadata.KEY_SUBTITLE, it) }
             season?.let { mediaMeta.putInt(MediaMetadata.KEY_SEASON_NUMBER, season)}
