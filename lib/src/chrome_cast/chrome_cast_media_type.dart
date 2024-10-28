@@ -1,1 +1,1 @@
-enum ChromeCastMediaType { movie, show }
+enum ChromeCastMediaType { hls, movie, show }
