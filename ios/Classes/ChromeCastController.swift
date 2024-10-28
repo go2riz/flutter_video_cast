@@ -124,16 +124,17 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         }
 
         // Set media type metadata
-        let mediaMetadata: GCKMediaMetadata
+        let mediaMetadata = GCKMediaMetadata(metadataType: .generic)
+//         let mediaMetadata: GCKMediaMetadata
 
-        switch args["type"] as? Int {
-        case 1:
-            mediaMetadata = GCKMediaMetadata(metadataType: .movie)
-        case 2:
-            mediaMetadata = GCKMediaMetadata(metadataType: .tvShow)
-        default:
-            mediaMetadata = GCKMediaMetadata(metadataType: .generic) // Fallback for HLS or other types
-        }
+//         switch args["type"] as? Int {
+//         case 1:
+//             mediaMetadata = GCKMediaMetadata(metadataType: .movie)
+//         case 2:
+//             mediaMetadata = GCKMediaMetadata(metadataType: .tvShow)
+//         default:
+//             mediaMetadata = GCKMediaMetadata(metadataType: .generic) // Fallback for HLS or other types
+//         }
 
         // Set title, description, season, and episode
         if let title = args["title"] as? String {
@@ -157,9 +158,8 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         // Build media information
         let builder = GCKMediaInformationBuilder(contentURL: url)
         builder.metadata = mediaMetadata
-        if args["type"] as? Int == nil || args["type"] as? Int == 0 {
-            builder.contentType = "application/x-mpegURL"
-        }
+        builder.contentType = "application/x-mpegURL"
+        builder.streamType = .buffered
         let mediaInformation = builder.build()
 
         // Set load options (autoplay and position)
