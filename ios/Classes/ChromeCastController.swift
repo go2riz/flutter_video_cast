@@ -8,7 +8,7 @@
 import Flutter
 import GoogleCast
 
-class ChromeCastController: NSObject, FlutterPlatformView, GCKRequestDelegate {
+class ChromeCastController: NSObject, FlutterPlatformView {
 
     // MARK: - Internal properties
 
