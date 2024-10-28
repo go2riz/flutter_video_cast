@@ -52,9 +52,9 @@ class ChromeCastController(
             val subtitles = args["subtitles"] as? List<*>
 
             val mediaMeta: MediaMetadata = if (type == 1){
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_GENERIC)
+                MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE)
             } else if (type == 2) {
-                MediaMetadata(MediaMetadata.MEDIA_TYPE_GENERIC)
+                MediaMetadata(MediaMetadata.MEDIA_TYPE_TV_SHOW)
             } else {
                 MediaMetadata(MediaMetadata.MEDIA_TYPE_GENERIC)
             }
