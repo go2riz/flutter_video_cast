@@ -8,7 +8,7 @@
 import Flutter
 import GoogleCast
 
-class ChromeCastController: NSObject, FlutterPlatformView {
+class ChromeCastController: NSObject, FlutterPlatformView, GCKRequestDelegate {
 
     // MARK: - Internal properties
 
@@ -171,7 +171,14 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         // Load media
         if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation, with: options) {
             request.delegate = self
+        } else {
+            print("Failed to initiate media load request")
         }
+    }
+
+    // Implement GCKRequestDelegate method to capture failure reasons
+    func requestDidFail(_ request: GCKRequest, withError error: GCKError) {
+        print("Media load request failed with error: \(error.localizedDescription)")
     }
 
     private func play() {
