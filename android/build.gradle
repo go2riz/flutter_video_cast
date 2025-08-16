@@ -1,26 +1,8 @@
 group 'it.aesys.flutter_video_cast'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// Rely on the app's root project for AGP/Kotlin plugin versions.
+// (Remove the old buildscript/classpaths to avoid version conflicts.)
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
@@ -29,21 +11,41 @@ android {
     namespace "it.aesys.flutter_video_cast"
     compileSdkVersion 34
 
+    defaultConfig {
+        minSdkVersion 24
+        // targetSdkVersion is not required for libraries
+    }
+
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-    defaultConfig {
-        minSdkVersion 24
+
+    // Align Java + Kotlin to JDK 17 (fixes the mismatched JVM-target error)
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    lintOptions {
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    // Replace deprecated lintOptions with lint { }
+    lint {
         disable 'InvalidPackage'
     }
 }
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+repositories {
+    google()
+    mavenCentral()
+}
 
-    //ChromeCast dependencies
+dependencies {
+    // Kotlin stdlib is added automatically by the Kotlin Gradle plugin; no need to pin jdk7.
+    // implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    // Chromecast deps (keep your current versions; update later if needed)
     implementation 'com.google.android.gms:play-services-cast-framework:21.2.0'
     implementation 'com.google.android.exoplayer:extension-cast:2.17.1'
 }
