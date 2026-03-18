@@ -8,7 +8,15 @@ First, add `flutter_video_cast` as a [dependency in your pubspec.yaml file](http
 
 ### iOS
 
-Set the minimum os target to iOS 11.0.
+Set the minimum iOS target to iOS 15.0 when using the default Cast XCFramework pod on Apple Silicon simulators and current Google Cast SDK releases.
+
+If you must keep iOS 13/14 support for physical-device builds, you can opt back into the legacy CocoaPods dependency before running `pod install`:
+
+```bash
+export FLUTTER_VIDEO_CAST_USE_LEGACY_IOS_CAST_POD=1
+```
+
+The legacy pod path keeps older deployment targets, but it does not solve Apple Silicon simulator support.
 
 Initialize the Cast context in the application delegate `ios/Runner/AppDelegate.m`:
 
