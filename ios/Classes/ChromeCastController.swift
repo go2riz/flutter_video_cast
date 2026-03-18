@@ -150,7 +150,9 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         }
 
         // Set image
-        if let imageUrlString = args["image"] as? String, let imageUrl = URL(string: imageUrlString) {
+        if let imageUrlString = args["image"] as? String,
+           !imageUrlString.isEmpty,
+           let imageUrl = URL(string: imageUrlString) {
             mediaMetadata.addImage(GCKImage(url: imageUrl, width: 480, height: 720))
         }
 

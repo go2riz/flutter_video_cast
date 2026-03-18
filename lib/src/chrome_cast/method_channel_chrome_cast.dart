@@ -100,7 +100,11 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
       'image': image,
       'season': showSeason,
       'episode': showEpisode,
-      'type': type == ChromeCastMediaType.movie ? 0 : 1,
+      'type': switch (type) {
+        ChromeCastMediaType.hls => 0,
+        ChromeCastMediaType.movie => 1,
+        ChromeCastMediaType.show => 2,
+      },
       'subtitles': subtitles?.map((e) => e.toMap()).toList(),
     };
     return channel(id)!.invokeMethod<void>('chromeCast#loadMedia', args);

@@ -64,7 +64,9 @@ class ChromeCastController(
             season?.let { mediaMeta.putInt(MediaMetadata.KEY_SEASON_NUMBER, season)}
             episode?.let { mediaMeta.putInt(MediaMetadata.KEY_EPISODE_NUMBER, episode)}
 
-            mediaMeta.addImage(WebImage(Uri.parse(image)))
+            if (!image.isNullOrBlank()) {
+                mediaMeta.addImage(WebImage(Uri.parse(image)))
+            }
 
             val tracks = mutableListOf<MediaTrack>();
             if (subtitles != null) {
@@ -223,6 +225,7 @@ class ChromeCastController(
                 removeSessionListener()
                 result.success(null)
             }
+            else -> result.notImplemented()
         }
     }
 
